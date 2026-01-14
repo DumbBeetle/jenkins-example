@@ -1,3 +1,15 @@
-sadsadasdassadasdssadasdasdasda
-sadasdassadsdsadas
-sadasdsad
+pipeline {   
+	agent any
+	environment {
+		NAME = 'Vl'
+		LASTNAME = 'Lev'
+	}
+
+	stages {
+	    stage('Build') {    //  stage('Build') {   steps {   sh 'echo $NAME $LASTNAME'   }   }   }    
+		    steps {   
+			  sh 'echo $NAME $LASTNAME'   
+		    }   
+	    }   
+	}   
+} 
