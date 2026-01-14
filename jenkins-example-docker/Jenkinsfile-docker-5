@@ -8,7 +8,7 @@
 pipeline {
   agent {
     dockerfile {
-      filename 'Dockerfile'  //  makes it explicit filename ( 'Dockerfile' )
+      filename 'jenkins-example-docker/Dockerfile'  //  makes it explicit filename ( 'Dockerfile' )
       reuseNode true         //  avoids extra workspace copies (faster builds)
     }
   }
@@ -24,4 +24,5 @@ pipeline {
       }
     }
   }
+
 }
