@@ -1,0 +1,116 @@
+/*  This pipeline demonstrates many core Jenkins features:
+      Global and stage-level environment variables
+      Multiple sequential stages
+      Logging to a file
+      retry and timeout
+      parallel execution
+      Workspace sharing between stages
+*/
+pipeline {
+    agent any
+    //  Global environment variables. Available in all stages
+    //  Can be overridden inside specific stages
+    environment {
+        OWNER = "Dima"
+        PROJECT = "Jenkins course"
+    }
+
+    stages {
+
+        stage('1-Build') {
+            steps {
+                sh "ls -la"
+                sh "pwd"
+                //  // $JOB_NAME is a built-in Jenkins environment variable
+                sh '''
+                  echo "this is project ${PROJECT} and his owner is ${OWNER}"
+                  echo "Job $JOB_NAME Start of Stage Build"  >> log.log      
+                  echo "Building......."
+                  echo "End of Stage Build" >> log.log
+                '''
+            }
+        }
+        stage('2-Test') {
+            environment{     //  stage-level environment variables
+                PROJECT = "Stage 2 : Test"  //  Overrides PROJECT only for this stage
+            }
+            steps {
+                sh '''
+                  echo "this is project $PROJECT and his owner is $OWNER"
+                  echo "Start of Stage Test" >> log.log
+                  echo "Testing......."
+                  echo "End of Stage Build" >> log.log
+                '''
+            }
+        }
+        stage('3-Deploy') {
+            steps {
+                sh '''
+                  echo "this is project $PROJECT and his owner is $OWNER"
+                  echo "Start of Stage Deploy" >> log.log
+                  echo "Deploying......."
+                  echo "Job $JOB_NAME End of Stage Build" >> log.log
+
+                  echo "------------------"
+                  ls -la
+                  echo "------------------"
+                  cat log.log
+                  echo "------------------"
+                '''
+                  script {
+                      if (fileExists('README.md')){
+                        cat README.md
+                      }
+                      else{
+                        echo "README.md file doesn't exist"
+                      }
+                  }
+
+            }
+        }
+        stage("try & retry"){
+            steps{
+                /*  Retries the block up to 3 times
+                    Retries only if the command fails (non-zero exit)   */
+                retry(3) { 
+			        sh 'echo "in retry"'
+		        }
+                /*  Entire block must finish within 7 seconds
+                    Since sleep 5 < 7 → it succeeds
+                    If it exceeded 7 seconds → Jenkins would abort the stage ❌  */
+		        timeout(time: 7, unit: 'SECONDS') { 
+			        sh 'sleep 5' 
+                    sh 'echo HELLO'
+		        } 
+            }
+        }
+        stage('Parallel Tasks') {
+            /*  Runs multiple stages at the same time
+                Shares the same workspace  
+                This demonstrates:
+                ✅ Parallel execution
+                ✅ Race conditions
+                ✅ Retry as a recovery mechanism    */
+            parallel {
+                stage('First task') {
+                    steps {
+                        retry(3) {
+                            echo 'Parallel Tasks -> First task -> Retry ...'
+                            // Add build commands here
+                            sh 'cat 1.txt'
+                        }
+                        echo 'Running First task...'
+                        sh "sleep 2"
+                    }
+                }
+                stage('Second task') {
+                    steps {
+                        echo 'Running Parallel Tasks -> Second task...'
+                        sh "sleep 1"
+                        sh 'echo "111" > 1.txt'
+                    }
+                }
+            }
+        }
+    }
+}

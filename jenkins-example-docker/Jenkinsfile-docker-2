@@ -1,0 +1,45 @@
+/*  This is a multi-agent Declarative Jenkins Pipeline. 
+    Each stage runs in its own Docker container, and there is no global agent.
+
+    ✔ Each stage uses its own isolated runtime
+    ✔ Backend and frontend toolchains don’t interfere
+    ✔ No shared container between stages
+    ✔ Clean and idiomatic Jenkinsfile
+
+    Workspace is shared (by default)
+    Even though containers differ, Jenkins mounts the same workspace into both containers.
+    If you want isolation add:
+    options {
+        skipDefaultCheckout()
+    }
+*/
+
+pipeline {
+  agent {
+    label 'docker'
+  }
+  stages {
+    stage('Back-end') {
+      agent {
+        docker {
+          image 'maven:3.9.6-eclipse-temurin-17'
+          reuseNode true            //  Faster builds with reuseNode true
+        }
+      }
+      steps {
+        sh 'mvn --version'
+      }
+    }
+    stage('Front-end') {
+      agent {
+        docker { 
+          image 'node:16-alpine'
+          reuseNode true
+        }
+      }
+      steps {
+        sh 'node --version'
+      }
+    }
+  }
+}

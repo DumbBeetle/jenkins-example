@@ -1,0 +1,27 @@
+/*  This is a Declarative Jenkins Pipeline that runs its steps inside a Docker container 
+       built from a Dockerfile in the repository.
+    Requirements for this pipeline to work
+    Jenkins agent must:
+      Have Docker installed
+      Have permission to run Docker (usually user in docker group)
+    Your repository must contain a Dockerfile  */
+pipeline {
+  agent {
+    dockerfile {
+      filename 'Dockerfile'  //  makes it explicit filename ( 'Dockerfile' )
+      reuseNode true         //  avoids extra workspace copies (faster builds)
+    }
+  }
+
+  stages {
+    stage('Test') {
+      steps {
+        sh '''
+          node --version
+          git --version
+          curl --version
+        '''
+      }
+    }
+  }
+}

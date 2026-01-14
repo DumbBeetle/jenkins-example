@@ -1,0 +1,33 @@
+// JENKINS Pipeline
+// need Plugin: Pipeline
+
+pipeline {
+//    agent { docker { image 'python:latest' } }
+//------------------------------------------------
+//    agent { label 'ubuntu' }
+//------------------------------------------------
+    agent any
+    stages {
+        stage('stage1') {
+            steps {
+                echo "this is stage number 1 - stage1"
+            }
+        }
+        stage('Python') {
+            steps {
+                echo "this is stage number 2 - Python"
+            }
+        }
+        post {
+            success {
+                echo 'Pipeline completed successfully.'
+            }
+            failure {
+                echo 'Pipeline failed.'
+            }
+            always {
+                echo 'Post Always part.'
+            }
+        }
+    }
+}

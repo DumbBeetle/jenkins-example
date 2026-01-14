@@ -1,0 +1,18 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Hello') {
+            steps {
+                echo 'Hello World'
+            }
+        }
+    }
+    post {
+        always {
+            mail to: 'amidamri12@gmail.com',
+                subject: "Build ${currentBuild.currentResult}: ${env.JOB_NAME}",
+                body: "Check console output at ${env.BUILD_URL}"
+        }
+    }
+}

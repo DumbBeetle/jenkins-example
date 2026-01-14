@@ -1,0 +1,59 @@
+pipeline {
+
+   agent { node { label 'docker' } }
+   //  agent any
+   
+   environment {
+      PROJECT_NAME = "Neptun"
+      OWNER_NAME   = "Denis Astahov"
+   }
+   stages {
+      stage('Clone Sources') {
+        steps {
+          checkout scm
+        } 
+      }
+      stage('Build') {
+         steps {
+            echo 'Build process..'
+            sh 'echo "My first pipeline"'
+            sh '''
+                echo "By the way, I can do more stuff in here"
+                ls -la ~
+                touch report
+            '''
+         }
+      }
+      stage('Test') {
+         steps {
+            echo "Start of Stage Test..."
+            echo "Testing......."
+            echo "Privet ${PROJECT_NAME}"
+            echo "Owner is ${OWNER_NAME}"
+            echo "End of Stage Build..."
+            echo 'Test process..'
+            sh 'exit 0'
+         }
+      }      
+      stage('Deploy') {
+         steps {
+            echo 'Deploy process..'
+         }
+      }
+      
+   }
+   post {   
+		always {
+			sh 'printenv'   
+		}   
+		success {   
+			sh 'echo "BUILD_NUMBER=$BUILD_NUMBER success" >> report' 
+		}   
+		failure {
+			sh 'echo "BUILD_NUMBER=$BUILD_NUMBER failed" >> report'   
+		}   
+		unstable {   
+			echo 'I will only get executed if this is unstable'   
+		}   
+   }
+}

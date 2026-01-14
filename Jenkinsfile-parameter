@@ -1,0 +1,61 @@
+pipeline {
+  agent any
+
+  environment {
+    PROJECT_NAME = "Test-Project"
+    OWNER_NAME   = "USER_1"
+  }
+  parameters {
+    string(name: 'STATEMENT', defaultValue: 'hello; ls /', description: 'What should I say?')
+    string(name: 'Greeting', defaultValue: 'Hello', description: 'How should I greet the world?')
+    choice(name: 'ENVIRE', choices: ['dev', 'stag', 'prod'], description: 'Select the environment')
+    string(name: 'TIME_SEC', defaultValue: '5', description: 'Time in seconds to sleep')
+    booleanParam(name: 'IsTEST',  defaultValue: true, description: 'is this test job?')
+  }
+  stages {
+    stage('1-Build') {
+      steps {
+        echo "-------  Start of Stage Build  -------"
+        sh('echo ${STATEMENT}')
+        echo "-------  Eof Stage Build  —------"
+      }
+    }
+    stage('2-Test') {
+      steps {
+        echo "-------  Start of Stage Test  -------"
+		    echo "${params.Greeting} World!"
+        echo "-------  Eof Stage Test  —------"
+      }
+    }
+    stage('3-Deploy') {
+      steps {
+        echo "-------  Start of Stage Deploy  -------"
+        echo "Hello from ${PROJECT_NAME}"
+        echo "Owner is ${OWNER_NAME}"
+        echo "-------  Eof Stage Deploy  —------"
+      }
+    }
+    stage('4-Finish') {
+      steps {
+        echo "CONGRATULATION!"
+      }
+    }
+  }
+post {
+      always {
+        mail to: 'amidamri12@gmail.com',
+             subject: "The Pipeline ${PROJECT_NAME} has finished",
+             body: "Wait for Results"
+      }
+      success {
+        mail to: 'amidamri12@gmail.com',
+             subject: "The Pipeline ${PROJECT_NAME} succeeded :)",
+             body: "Check console output at ${env.BUILD_URL}"
+      }
+      failure {
+        mail to: 'amidamri12@gmail.com',
+             subject: "The Pipeline ${PROJECT_NAME} failed :(",
+             body: "Check console output at ${env.BUILD_URL}"
+      }
+    }
+}

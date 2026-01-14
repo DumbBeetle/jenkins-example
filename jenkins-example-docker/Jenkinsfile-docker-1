@@ -1,0 +1,21 @@
+/*  This is a Declarative Jenkins Pipeline with a global Docker agent
+*/
+
+pipeline {
+  agent {
+    label 'docker'
+  }
+  stages {
+    stage('Test') {
+      agent {
+          docker {
+            image 'node:16-alpine'
+            reuseNode true
+          }
+       }
+      steps {
+        sh 'node --version'
+      }
+    }
+  }
+}
